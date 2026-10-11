@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#efe3cf"/><stop offset="1" stop-color="#d8c2a2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1350" fill="url(#wall)"/>
+  <rect y="1020" width="1080" height="330" fill="#b89a76"/>
+  <g opacity=".35" fill="#fffaf0"><polygon points="560,0 760,0 1080,520 1080,760"/><polygon points="820,0 900,0 1080,300 1080,420"/></g>
+  <ellipse cx="540" cy="430" rx="92" ry="112" fill="#e7c7a7"/>
+  <path d="M448 400 q92 -170 184 0 q-10 -70 -92 -78 q-82 8 -92 78z" fill="#3a2a20"/>
+  <rect x="476" y="410" width="58" height="26" rx="12" fill="none" stroke="#1e1b18" stroke-width="7"/>
+  <rect x="546" y="410" width="58" height="26" rx="12" fill="none" stroke="#1e1b18" stroke-width="7"/>
+  <path d="M380 1350 L410 640 Q540 560 670 640 L700 1350z" fill="#9b7653"/>
+  <path d="M540 600 L470 760 L540 1350 M540 600 L610 760 L540 1350" stroke="#00000022" stroke-width="10" fill="none"/>
+  <rect x="440" y="820" width="200" height="140" rx="6" fill="#f6efe2" transform="rotate(-8 540 890)"/>
+  <!-- placeholder ph01: trench coat, book, cafe -->
+</svg>
