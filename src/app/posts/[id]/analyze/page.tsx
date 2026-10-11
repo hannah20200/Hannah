@@ -34,7 +34,7 @@ export default function AnalyzePage() {
 
   if (error) return <ErrorBox>{error}</ErrorBox>;
   if (!post) return <Loading />;
-  if (busy === "draft") return <Working label="원고를 쓰고 있어요" hint="표지 2종 · 도입 · 항목 6개 · 마무리 · 캡션 — 보통 1~2분 걸려요" />;
+  if (busy === "draft") return <Working label="원고를 쓰고 있어요" hint="표지 2종 · 도입 · 항목 · 마무리 · 캡션 — 보통 1~2분 걸려요" />;
   if (busy === "reanalyze") return <Working label="다시 분석하고 있어요" hint="보통 30초~1분 걸려요" />;
 
   const a = post.analysis;

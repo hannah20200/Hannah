@@ -62,11 +62,29 @@ describe("schema", () => {
     assert.ok(DraftOutputSchema.safeParse(sampleDraft()).success);
   });
 
-  it("기둥별 2개 규칙 위반을 잡는다", () => {
+  it("항목 수는 3~8개, 캐러셀 10장을 넘으면 안 된다", () => {
     const d = sampleDraft();
-    d.items[0].pillar = "BUY";
-    const r = DraftOutputSchema.safeParse(d);
-    assert.equal(r.success, false);
+    const item = d.items[0];
+    assert.ok(DraftOutputSchema.safeParse({ ...d, items: d.items.slice(0, 3) }).success, "3개 OK");
+    assert.equal(DraftOutputSchema.safeParse({ ...d, items: d.items.slice(0, 2) }).success, false, "2개는 안 됨");
+    // 표지1 + 도입1 + 항목7 + 마무리1 = 10장 OK
+    assert.ok(DraftOutputSchema.safeParse({ ...d, items: Array(7).fill(item) }).success, "7개 + 도입 OK");
+    // 항목 8개 + 도입 1 = 11장 → 안 됨, 도입 없이 8개 = 10장 OK
+    const eight = DraftOutputSchema.safeParse({ ...d, items: Array(8).fill(item) });
+    assert.equal(eight.success, false);
+    assert.match(JSON.stringify(eight.error?.issues), /10장을 넘습니다/);
+    assert.ok(DraftOutputSchema.safeParse({ ...d, intro: [], items: Array(8).fill(item) }).success, "도입 없이 8개 OK");
+  });
+
+  it("카테고리는 게시물 단위로 하나 (없어도 됨), 항목에는 붙이지 않는다", () => {
+    const d = sampleDraft();
+    assert.equal(DraftSchema.parse(d).category, undefined);
+    assert.equal(DraftSchema.parse({ ...d, category: "WEAR" }).category, "WEAR");
+    assert.equal(DraftSchema.safeParse({ ...d, category: "TRAVEL" }).success, false);
+    // 예전 형식(항목마다 pillar)의 원고도 읽히고, pillar는 버려진다
+    const legacy = { ...d, items: d.items.map((i: object) => ({ ...i, pillar: "READ" })) };
+    const parsed = DraftSchema.parse(legacy);
+    assert.ok(!("pillar" in parsed.items[0]));
   });
 
   it("구조화 출력용 JSON schema를 만들 수 있다 (사진 필드 없음)", () => {
@@ -164,11 +182,10 @@ describe("claude.ts", () => {
 describe("rewriteSlide", () => {
   const withPhotos = () => DraftSchema.parse(JSON.parse(readFileSync("samples/taste_check.json", "utf8")));
 
-  it("항목: pillar·번호는 그대로, 검색어가 바뀌면 사진을 비운다", async () => {
+  it("항목: 번호는 그대로, 검색어가 바뀌면 사진을 비운다", async () => {
     const draft = withPhotos();
     const { client, calls } = fakeClient([
       JSON.stringify({
-        pillar: "WEAR",
         head: "새로 쓴 제목",
         body: ["첫 줄이에요.", "둘째 줄이에요."],
         key: ["핵심 문장이에요."],
@@ -179,7 +196,6 @@ describe("rewriteSlide", () => {
     setClientForTesting(client);
     const r = await rewriteSlide({ draft, analysis, target: "item.3", note: "더 짧게" });
     const item = r.draft.items[2];
-    assert.equal(item.pillar, "BUY");
     assert.equal(item.head, "3. 새로 쓴 제목");
     assert.equal(item.photo, undefined);
     assert.deepEqual(r.draft.items[0], draft.items[0], "다른 장은 그대로");
@@ -204,7 +220,7 @@ describe("rewriteSlide", () => {
 
   it("항목 제목이 레퍼런스와 겹치면 한 번 더 요청", async () => {
     const item = (head: string) =>
-      JSON.stringify({ pillar: "READ", head, body: ["a", "b"], key: ["c"], pick: "PICK · d", photo_query: "q" });
+      JSON.stringify({ head, body: ["a", "b"], key: ["c"], pick: "PICK · d", photo_query: "q" });
     const { client, calls } = fakeClient([item("1. 퇴근 후 30분 산책하기"), item("1. 전혀 다른 제목")]);
     setClientForTesting(client);
     const r = await rewriteSlide({ draft: withPhotos(), analysis, target: "item.1" });

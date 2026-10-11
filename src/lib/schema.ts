@@ -23,7 +23,8 @@ const lines = (min: number, max: number) => z.array(z.string().min(1)).min(min).
 
 export const CoverSchema = z.object({
   variant: z.enum(["A", "B"]),
-  top_line: z.string().min(1),
+  /** 표지 상단 한 줄 (없어도 됨 — 표지는 짧을수록 좋다) */
+  top_line: z.string().optional(),
   title: lines(1, 2),
   sub: z.string().min(1),
   photo_query: z.string().min(1),
@@ -41,11 +42,11 @@ export const IntroSchema = z.object({
 });
 export type Intro = z.infer<typeof IntroSchema>;
 
-export const PillarSchema = z.enum(["READ", "BUY", "WEAR"]);
-export type Pillar = z.infer<typeof PillarSchema>;
+/** 계정 전체의 카테고리. 게시물 하나가 하나에 속하거나(또는 없음), 항목마다 붙이지 않는다 */
+export const CategorySchema = z.enum(["READ", "BUY", "WEAR"]);
+export type Category = z.infer<typeof CategorySchema>;
 
 export const ItemSchema = z.object({
-  pillar: PillarSchema,
   head: z.string().min(1),
   body: lines(1, 3),
   key: lines(1, 1),
@@ -63,10 +64,18 @@ export const EndSchema = z.object({
 });
 export type End = z.infer<typeof EndSchema>;
 
+export const ITEMS_MIN = 3;
+export const ITEMS_MAX = 8;
+/** Instagram 캐러셀 최대 장수 (게시할 때 표지는 A/B 중 1장) */
+export const CAROUSEL_MAX = 10;
+
 const draftShape = {
+  /** 이 게시물이 속한 계정 카테고리 (없으면 비움) */
+  category: CategorySchema.optional(),
   covers: z.array(CoverSchema).length(2),
-  intro: z.array(IntroSchema).min(1),
-  items: z.array(ItemSchema).length(6),
+  intro: z.array(IntroSchema).max(1),
+  /** 항목 수는 레퍼런스 구성에 맞춰 자유롭게 (캐러셀 10장 한도는 checkDraft에서) */
+  items: z.array(ItemSchema).min(ITEMS_MIN).max(ITEMS_MAX),
   end: EndSchema,
   caption: z.string().min(1),
   hashtags: z.array(z.string().regex(/^#\S+$/)).min(1),
@@ -76,16 +85,18 @@ const draftShape = {
   }),
 };
 
-function checkDraft(d: { covers: { variant: string }[]; items: { pillar: Pillar }[] }, ctx: z.RefinementCtx) {
+function checkDraft(d: { covers: { variant: string }[]; intro: unknown[]; items: unknown[] }, ctx: z.RefinementCtx) {
   const variants = d.covers.map((c) => c.variant).sort().join("");
   if (variants !== "AB") {
     ctx.addIssue({ code: "custom", path: ["covers"], message: "표지는 A/B 두 버전이어야 합니다" });
   }
-  for (const p of PillarSchema.options) {
-    const n = d.items.filter((i) => i.pillar === p).length;
-    if (n !== 2) {
-      ctx.addIssue({ code: "custom", path: ["items"], message: `${p} 항목은 2개여야 합니다 (현재 ${n}개)` });
-    }
+  const slides = 1 + d.intro.length + d.items.length + 1;
+  if (slides > CAROUSEL_MAX) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["items"],
+      message: `표지 1 + 도입 ${d.intro.length} + 항목 ${d.items.length} + 마무리 1 = ${slides}장으로 캐러셀 ${CAROUSEL_MAX}장을 넘습니다`,
+    });
   }
 }
 
@@ -100,8 +111,8 @@ export type Draft = z.infer<typeof DraftSchema>;
 export const DraftOutputBase = z.object({
   ...draftShape,
   covers: z.array(CoverSchema.omit({ photo: true, collage: true })).length(2),
-  intro: z.array(IntroSchema.omit({ photo: true })).min(1),
-  items: z.array(ItemSchema.omit({ photo: true })).length(6),
+  intro: z.array(IntroSchema.omit({ photo: true })).max(1),
+  items: z.array(ItemSchema.omit({ photo: true })).min(ITEMS_MIN).max(ITEMS_MAX),
   end: EndSchema.omit({ photo: true }).extend({ photo_query: z.string().min(1) }),
 });
 export const DraftOutputSchema = DraftOutputBase.superRefine(checkDraft);

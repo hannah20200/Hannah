@@ -4,7 +4,11 @@ import { canvas, color, page as t } from "./tokens";
 
 type PageProps =
   | { kind: "intro"; data: Intro }
-  | { kind: "item"; data: Item };
+  | {
+      kind: "item";
+      data: Item;
+      /** 게시물 카테고리 라벨 (없으면 표시 안 함) */ label?: string;
+    };
 
 /** 본문 장: 같은 사진을 흐리게 깐 배경 + 선명한 사진 카드 */
 export function Page(props: PageProps) {
@@ -13,33 +17,41 @@ export function Page(props: PageProps) {
   const photo = data.photo;
   const cardTop = isItem ? t.card.topWithTitle : t.card.topIntro;
   const cardHeight = isItem ? t.card.heightWithTitle : t.card.heightIntro;
-  const textTop = cardTop + cardHeight + t.body.offsetFromCard - t.body.lineHeight / 2;
+  const textTop =
+    cardTop + cardHeight + t.body.offsetFromCard - t.body.lineHeight / 2;
 
   return (
     <Frame credits={photo ? [photo] : []}>
-      <BlurBackground photo={photo} blur={t.bgBlur} scale={t.bgScale} dim={t.bgDim} />
+      <BlurBackground
+        photo={photo}
+        blur={t.bgBlur}
+        scale={t.bgScale}
+        dim={t.bgDim}
+      />
 
       {props.kind === "item" && (
         <>
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: centerTop(t.label.y, t.label.size * 1.4),
-              lineHeight: `${t.label.size * 1.4}px`,
-              fontSize: t.label.size,
-              fontWeight: t.label.weight,
-              letterSpacing: t.label.letterSpacing,
-              // 자간이 오른쪽에 붙어 중앙이 밀리는 것 보정
-              paddingLeft: t.label.letterSpacing,
-              color: color.butter,
-              textAlign: "center",
-              textShadow: color.textShadow,
-            }}
-          >
-            {props.data.pillar}
-          </div>
+          {props.label && (
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: centerTop(t.label.y, t.label.size * 1.4),
+                lineHeight: `${t.label.size * 1.4}px`,
+                fontSize: t.label.size,
+                fontWeight: t.label.weight,
+                letterSpacing: t.label.letterSpacing,
+                // 자간이 오른쪽에 붙어 중앙이 밀리는 것 보정
+                paddingLeft: t.label.letterSpacing,
+                color: color.butter,
+                textAlign: "center",
+                textShadow: color.textShadow,
+              }}
+            >
+              {props.label}
+            </div>
+          )}
           <FitLine
             style={{
               position: "absolute",
@@ -112,7 +124,15 @@ export function Page(props: PageProps) {
   );
 }
 
-function Card({ photo, top, height }: { photo?: Photo; top: number; height: number }) {
+function Card({
+  photo,
+  top,
+  height,
+}: {
+  photo?: Photo;
+  top: number;
+  height: number;
+}) {
   return (
     <div
       style={{
@@ -128,7 +148,16 @@ function Card({ photo, top, height }: { photo?: Photo; top: number; height: numb
       }}
     >
       {photo && (
-        <img src={photo.src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <img
+          src={photo.src}
+          alt=""
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
       )}
     </div>
   );
@@ -136,7 +165,8 @@ function Card({ photo, top, height }: { photo?: Photo; top: number; height: numb
 
 /** "PICK · 선택지" → BUTTER 테두리 알약 */
 function Pick({ text }: { text: string }) {
-  const [, label = "PICK", rest = text] = text.match(/^(PICK)\s*·\s*(.*)$/) ?? [];
+  const [, label = "PICK", rest = text] =
+    text.match(/^(PICK)\s*·\s*(.*)$/) ?? [];
   return (
     <div
       data-fit="1"
@@ -156,7 +186,9 @@ function Pick({ text }: { text: string }) {
         textShadow: color.textShadow,
       }}
     >
-      <span style={{ color: color.butter, fontWeight: 800, letterSpacing: 1 }}>{label}</span>
+      <span style={{ color: color.butter, fontWeight: 800, letterSpacing: 1 }}>
+        {label}
+      </span>
       <span style={{ color: color.butter, margin: "0 12px" }}>·</span>
       <span>{rest}</span>
     </div>

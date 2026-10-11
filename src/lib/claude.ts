@@ -321,8 +321,8 @@ export async function rewriteSlide(
     rules = [
       `- variant는 "${arg}" 그대로.`,
       `- 다른 표지(${other?.title.join(" ")})와 제목·photo_query가 달라야 한다.`,
-      "- title은 2줄, 반말·구어체, 한 줄에 12자 안팎. 숫자는 제목보다 sub에.",
-      "- top_line은 독자의 속마음 같은 짧은 한 줄.",
+      "- title은 2줄, 반말·구어체. 숫자는 제목보다 sub에.",
+      "- title은 한 줄에 9자 안팎으로 짧게. top_line은 꼭 필요할 때만 (없어도 됨).",
     ].join("\n");
     schema = CoverOut;
   } else if (kind === "intro" && plain.intro[Number(arg) - 1]) {
@@ -335,7 +335,6 @@ export async function rewriteSlide(
     current = item;
     label = `${arg}번 항목`;
     rules = [
-      `- pillar는 "${item.pillar}" 그대로.`,
       `- head는 "${arg}. 항목 제목" 형식, 한 줄에 20자 안팎.`,
       "- body 2줄(존댓말, 한 줄에 25자 안팎), key 1줄.",
       "- pick은 \"PICK · 구체적 선택지\" 형식. 이번 주에 바로 할 수 있을 만큼 구체적으로.",
@@ -403,7 +402,7 @@ export async function rewriteSlide(
     const i = Number(arg) - 1;
     const prev = next.items[i];
     const head = /^\s*\d+\s*\./.test(slide.head) ? slide.head.replace(/^\s*\d+/, String(i + 1)) : `${i + 1}. ${slide.head}`;
-    next.items[i] = { ...slide, head, pillar: prev.pillar, ...keepPhoto(prev, slide) };
+    next.items[i] = { ...slide, head, ...keepPhoto(prev, slide) };
   } else {
     next.end = { ...slide, ...keepPhoto(next.end, slide) };
   }

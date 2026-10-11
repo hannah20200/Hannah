@@ -27,7 +27,10 @@ export function buildSlides(draft: Draft): SlideSpec[] {
     slides.push({ name: `${pad(n++)}_도입${suffix}`, element: createElement(Page, { kind: "intro", data: intro }) });
   });
   draft.items.forEach((item, i) => {
-    slides.push({ name: `${pad(n++)}_항목${i + 1}`, element: createElement(Page, { kind: "item", data: item }) });
+    slides.push({
+      name: `${pad(n++)}_항목${i + 1}`,
+      element: createElement(Page, { kind: "item", data: item, label: draft.category }),
+    });
   });
   slides.push({ name: `${pad(n)}_마무리`, element: createElement(End, { data: draft.end }) });
   return slides;
