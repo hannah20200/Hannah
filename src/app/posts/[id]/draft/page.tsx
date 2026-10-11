@@ -7,12 +7,17 @@ import { cleanLines, LinesField, TextField } from "@/app/_components/fields";
 import { browserDraft, SlidePreview } from "@/app/_components/slide-preview";
 import { Button, Card, ErrorBox, Loading, Notice, Spinner } from "@/app/_components/ui";
 import { findOverlaps, type Overlap } from "@/lib/overlap";
-import type { Draft, Pillar } from "@/lib/schema";
+import type { Category, Draft } from "@/lib/schema";
 import { Cover } from "@/templates/Cover";
 import { End } from "@/templates/End";
 import { Page } from "@/templates/Page";
 
-const PILLARS: Pillar[] = ["READ", "BUY", "WEAR"];
+const CATEGORIES: { value: Category | undefined; label: string }[] = [
+  { value: "READ", label: "READ 읽다" },
+  { value: "BUY", label: "BUY 사다" },
+  { value: "WEAR", label: "WEAR 입다" },
+  { value: undefined, label: "해당 없음" },
+];
 
 /** 저장 전 정리: 빈 줄 제거, 해시태그 # 붙이기 */
 function normalize(d: Draft): Draft {
@@ -142,6 +147,22 @@ export default function DraftPage() {
       )}
       {draft.self_check.notes && <p className="text-xs text-muted">겹침 점검: {draft.self_check.notes}</p>}
 
+      <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-paper px-5 py-4">
+        <span className="text-sm font-extrabold">이 게시물의 카테고리</span>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c.label}
+              onClick={() => edit((d) => void (d.category = c.value))}
+              className={`rounded-full px-3 py-1 text-xs font-bold ${draft.category === c.value ? "bg-butter text-ink" : "border border-line text-muted"}`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+        <span className="text-xs text-muted">계정 전체 분류예요. 고르면 항목 장 위쪽에 라벨로 표시돼요.</span>
+      </section>
+
       {[...draft.covers]
         .map((c, i) => ({ c, i }))
         .sort((a, b) => a.c.variant.localeCompare(b.c.variant))
@@ -170,18 +191,7 @@ export default function DraftPage() {
       ))}
 
       {draft.items.map((s, i) => (
-        <SlideRow key={`item-${i}`} title={`항목 ${i + 1}`} target={`item.${i + 1}`} preview={<Page kind="item" data={preview.items[i]} />} deps={s} {...slideProps}>
-          <div className="flex gap-2">
-            {PILLARS.map((p) => (
-              <button
-                key={p}
-                onClick={() => edit((d) => void (d.items[i].pillar = p))}
-                className={`rounded-full px-3 py-1 text-xs font-bold ${s.pillar === p ? "bg-butter text-ink" : "border border-line text-muted"}`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+        <SlideRow key={`item-${i}`} title={`항목 ${i + 1}`} target={`item.${i + 1}`} preview={<Page kind="item" data={preview.items[i]} label={draft.category} />} deps={s} {...slideProps}>
           <TextField label="항목 제목" value={s.head} onChange={(v) => edit((d) => void (d.items[i].head = v))} />
           <LinesField label="본문 (2줄, 존댓말)" value={s.body} min={1} max={3} onChange={(v) => edit((d) => void (d.items[i].body = v))} />
           <LinesField label="굵은 밑줄 문장" value={s.key} min={1} max={1} onChange={(v) => edit((d) => void (d.items[i].key = v))} />

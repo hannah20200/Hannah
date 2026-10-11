@@ -41,11 +41,11 @@ export const IntroSchema = z.object({
 });
 export type Intro = z.infer<typeof IntroSchema>;
 
-export const PillarSchema = z.enum(["READ", "BUY", "WEAR"]);
-export type Pillar = z.infer<typeof PillarSchema>;
+/** 계정 전체의 카테고리. 게시물 하나가 하나에 속하거나(또는 없음), 항목마다 붙이지 않는다 */
+export const CategorySchema = z.enum(["READ", "BUY", "WEAR"]);
+export type Category = z.infer<typeof CategorySchema>;
 
 export const ItemSchema = z.object({
-  pillar: PillarSchema,
   head: z.string().min(1),
   body: lines(1, 3),
   key: lines(1, 1),
@@ -64,6 +64,8 @@ export const EndSchema = z.object({
 export type End = z.infer<typeof EndSchema>;
 
 const draftShape = {
+  /** 이 게시물이 속한 계정 카테고리 (없으면 비움) */
+  category: CategorySchema.optional(),
   covers: z.array(CoverSchema).length(2),
   intro: z.array(IntroSchema).min(1),
   items: z.array(ItemSchema).length(6),
@@ -76,16 +78,10 @@ const draftShape = {
   }),
 };
 
-function checkDraft(d: { covers: { variant: string }[]; items: { pillar: Pillar }[] }, ctx: z.RefinementCtx) {
+function checkDraft(d: { covers: { variant: string }[] }, ctx: z.RefinementCtx) {
   const variants = d.covers.map((c) => c.variant).sort().join("");
   if (variants !== "AB") {
     ctx.addIssue({ code: "custom", path: ["covers"], message: "표지는 A/B 두 버전이어야 합니다" });
-  }
-  for (const p of PillarSchema.options) {
-    const n = d.items.filter((i) => i.pillar === p).length;
-    if (n !== 2) {
-      ctx.addIssue({ code: "custom", path: ["items"], message: `${p} 항목은 2개여야 합니다 (현재 ${n}개)` });
-    }
   }
 }
 

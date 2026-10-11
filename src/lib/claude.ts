@@ -335,7 +335,6 @@ export async function rewriteSlide(
     current = item;
     label = `${arg}번 항목`;
     rules = [
-      `- pillar는 "${item.pillar}" 그대로.`,
       `- head는 "${arg}. 항목 제목" 형식, 한 줄에 20자 안팎.`,
       "- body 2줄(존댓말, 한 줄에 25자 안팎), key 1줄.",
       "- pick은 \"PICK · 구체적 선택지\" 형식. 이번 주에 바로 할 수 있을 만큼 구체적으로.",
@@ -403,7 +402,7 @@ export async function rewriteSlide(
     const i = Number(arg) - 1;
     const prev = next.items[i];
     const head = /^\s*\d+\s*\./.test(slide.head) ? slide.head.replace(/^\s*\d+/, String(i + 1)) : `${i + 1}. ${slide.head}`;
-    next.items[i] = { ...slide, head, pillar: prev.pillar, ...keepPhoto(prev, slide) };
+    next.items[i] = { ...slide, head, ...keepPhoto(prev, slide) };
   } else {
     next.end = { ...slide, ...keepPhoto(next.end, slide) };
   }

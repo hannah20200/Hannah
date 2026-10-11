@@ -3,99 +3,192 @@
     {
       "variant": "A",
       "top_line": "연말 쇼핑 전에, 이것부터",
-      "title": ["취향 좋은 여자들이", "10월에 몰래 하는 것"],
+      "title": [
+        "취향 좋은 여자들이",
+        "10월에 몰래 하는 것"
+      ],
       "sub": "연말 전, 내 취향을 정리하는 6가지",
       "photo_query": "woman trench coat reading book cafe daylight",
-      "photo": { "src": "photos/ph01.svg", "credit": "placeholder" },
+      "photo": {
+        "src": "photos/ph01.svg",
+        "credit": "placeholder"
+      },
       "collage": [
-        { "src": "photos/ph02.svg", "credit": "placeholder" },
-        { "src": "photos/ph05.svg", "credit": "placeholder" }
+        {
+          "src": "photos/ph02.svg",
+          "credit": "placeholder"
+        },
+        {
+          "src": "photos/ph05.svg",
+          "credit": "placeholder"
+        }
       ]
     },
     {
       "variant": "B",
       "top_line": "읽은 책, 입은 옷, 산 것까지",
-      "title": ["올해 잘 산 거 3개,", "바로 말할 수 있어?"],
+      "title": [
+        "올해 잘 산 거 3개,",
+        "바로 말할 수 있어?"
+      ],
       "sub": "연말 전, 내 취향을 정리하는 6가지",
       "photo_query": "woman glasses coffee window natural light",
-      "photo": { "src": "photos/ph04.svg", "credit": "placeholder" },
+      "photo": {
+        "src": "photos/ph04.svg",
+        "credit": "placeholder"
+      },
       "collage": [
-        { "src": "photos/ph09.svg", "credit": "placeholder" },
-        { "src": "photos/ph06.svg", "credit": "placeholder" }
+        {
+          "src": "photos/ph09.svg",
+          "credit": "placeholder"
+        },
+        {
+          "src": "photos/ph06.svg",
+          "credit": "placeholder"
+        }
       ]
     }
   ],
   "intro": [
     {
-      "body": ["새로 사고, 새로 읽기 전에", "올해 내가 뭘 좋아했는지부터 꺼내 보세요."],
-      "key": ["취향은 늘리는 게 아니라,", "고르는 데서 생기니까요."],
+      "body": [
+        "새로 사고, 새로 읽기 전에",
+        "올해 내가 뭘 좋아했는지부터 꺼내 보세요."
+      ],
+      "key": [
+        "취향은 늘리는 게 아니라,",
+        "고르는 데서 생기니까요."
+      ],
       "photo_query": "woman reading by window afternoon light",
-      "photo": { "src": "photos/ph03.svg", "credit": "placeholder" }
+      "photo": {
+        "src": "photos/ph03.svg",
+        "credit": "placeholder"
+      }
     }
   ],
   "items": [
     {
-      "pillar": "READ",
       "head": "1. 관심 분야 하나, 연말까지 딱 3권",
-      "body": ["요즘 자꾸 눈이 가는 주제 하나만 정해 보세요.", "여러 권을 얕게 읽는 것보다 오래 남아요."],
-      "key": ["3권이면 대화에 꺼낼 수 있는 취향이 돼요."],
+      "body": [
+        "요즘 자꾸 눈이 가는 주제 하나만 정해 보세요.",
+        "여러 권을 얕게 읽는 것보다 오래 남아요."
+      ],
+      "key": [
+        "3권이면 대화에 꺼낼 수 있는 취향이 돼요."
+      ],
       "pick": "PICK · 입문서 → 에세이 → 인터뷰집 순서로",
       "photo_query": "stack of books coffee table daylight",
-      "photo": { "src": "photos/ph05.svg", "credit": "placeholder" }
+      "photo": {
+        "src": "photos/ph05.svg",
+        "credit": "placeholder"
+      }
     },
     {
-      "pillar": "READ",
       "head": "2. 저장만 해둔 것, 다시 열어보기",
-      "body": ["저장 버튼 누른 글과 영상, 생각보다 많죠.", "그 안에 이미 내 취향이 정리돼 있어요."],
-      "key": ["모아둔 걸 해보는 순간 진짜 내 것이 돼요."],
+      "body": [
+        "저장 버튼 누른 글과 영상, 생각보다 많죠.",
+        "그 안에 이미 내 취향이 정리돼 있어요."
+      ],
+      "key": [
+        "모아둔 걸 해보는 순간 진짜 내 것이 돼요."
+      ],
       "pick": "PICK · 3개만 남기고, 이번 주에 하나 해보기",
       "photo_query": "woman notebook phone cafe candid",
-      "photo": { "src": "photos/ph08.svg", "credit": "placeholder" }
+      "photo": {
+        "src": "photos/ph08.svg",
+        "credit": "placeholder"
+      }
     },
     {
-      "pillar": "BUY",
       "head": "3. 매일 쓰는 것부터 좋은 걸로",
-      "body": ["가끔 쓰는 비싼 물건보다", "매일 손에 닿는 물건이 하루의 기분을 바꿔요."],
-      "key": ["머그잔, 펜, 파우치처럼 작은 것부터요."],
+      "body": [
+        "가끔 쓰는 비싼 물건보다",
+        "매일 손에 닿는 물건이 하루의 기분을 바꿔요."
+      ],
+      "key": [
+        "머그잔, 펜, 파우치처럼 작은 것부터요."
+      ],
       "pick": "PICK · 이번 달 업그레이드할 물건 딱 하나",
       "photo_query": "ceramic mug pen desk morning light",
-      "photo": { "src": "photos/ph09.svg", "credit": "placeholder" }
+      "photo": {
+        "src": "photos/ph09.svg",
+        "credit": "placeholder"
+      }
     },
     {
-      "pillar": "BUY",
       "head": "4. 연말 세일 전, 장바구니 30일 묵혀보기",
-      "body": ["세일 기간엔 필요한 것보다 싼 것에 손이 가요.", "30일 뒤에도 생각나는 게 진짜 갖고 싶은 거예요."],
-      "key": ["살까 말까 할 땐, 시간이 대신 골라줘요."],
+      "body": [
+        "세일 기간엔 필요한 것보다 싼 것에 손이 가요.",
+        "30일 뒤에도 생각나는 게 진짜 갖고 싶은 거예요."
+      ],
+      "key": [
+        "살까 말까 할 땐, 시간이 대신 골라줘요."
+      ],
       "pick": "PICK · 세일 알림 대신 위시리스트 메모",
       "photo_query": "handwritten list notebook desk daylight",
-      "photo": { "src": "photos/ph10.svg", "credit": "placeholder" }
+      "photo": {
+        "src": "photos/ph10.svg",
+        "credit": "placeholder"
+      }
     },
     {
-      "pillar": "WEAR",
       "head": "5. 올해 가장 많이 입은 옷 3벌 찾기",
-      "body": ["옷장에서 가장 자주 손이 간 옷을 꺼내 보세요.", "색, 핏, 소재 중 반복되는 게 하나쯤 있을 거예요."],
-      "key": ["그게 지금 내 스타일의 기준이에요."],
+      "body": [
+        "옷장에서 가장 자주 손이 간 옷을 꺼내 보세요.",
+        "색, 핏, 소재 중 반복되는 게 하나쯤 있을 거예요."
+      ],
+      "key": [
+        "그게 지금 내 스타일의 기준이에요."
+      ],
       "pick": "PICK · 그 3벌의 공통점을 한 줄로 적기",
       "photo_query": "woman knit cardigan street style daylight",
-      "photo": { "src": "photos/ph11.svg", "credit": "placeholder" }
+      "photo": {
+        "src": "photos/ph11.svg",
+        "credit": "placeholder"
+      }
     },
     {
-      "pillar": "WEAR",
       "head": "6. 새 옷 여러 벌 대신, 시그니처 하나",
-      "body": ["매번 다른 옷보다 늘 같은 포인트 하나가", "그 사람 하면 떠오르는 인상을 만들어요."],
-      "key": ["취향 있는 사람은 기억되는 디테일이 있어요."],
+      "body": [
+        "매번 다른 옷보다 늘 같은 포인트 하나가",
+        "그 사람 하면 떠오르는 인상을 만들어요."
+      ],
+      "key": [
+        "취향 있는 사람은 기억되는 디테일이 있어요."
+      ],
       "pick": "PICK · 안경, 귀걸이, 코트 중 딱 하나",
       "photo_query": "woman eyeglasses trench coat portrait natural light",
-      "photo": { "src": "photos/ph12.svg", "credit": "placeholder" }
+      "photo": {
+        "src": "photos/ph12.svg",
+        "credit": "placeholder"
+      }
     }
   ],
   "end": {
-    "lines": ["올해 나를 설명하는 물건,", "딱 하나만 고른다면?"],
+    "lines": [
+      "올해 나를 설명하는 물건,",
+      "딱 하나만 고른다면?"
+    ],
     "cta": "연말 정리할 때 꺼내 보게 저장해 두세요",
     "photo_query": "cozy evening journal warm lamp",
-    "photo": { "src": "photos/ph13.svg", "credit": "placeholder" }
+    "photo": {
+      "src": "photos/ph13.svg",
+      "credit": "placeholder"
+    }
   },
   "caption": "새로 사고 새로 읽기 전에, 올해의 취향부터 정리해 보세요.\n\n읽은 것, 산 것, 입은 것 중에\n'이건 진짜 나다' 싶은 걸 고르는 6가지 방법을 모았어요.\n\n올해 나를 설명하는 물건 하나, 댓글로 알려주세요.\n연말 정리할 때 다시 꺼내 보게 저장해 두는 것도 잊지 말고요.",
-  "hashtags": ["#작은매거진", "#취향", "#연말정리", "#책추천", "#소비습관", "#데일리룩", "#시그니처아이템", "#직장인취미"],
-  "self_check": { "overlap_with_reference": false, "notes": "샘플 원고 — 비교할 레퍼런스 없음" }
+  "hashtags": [
+    "#작은매거진",
+    "#취향",
+    "#연말정리",
+    "#책추천",
+    "#소비습관",
+    "#데일리룩",
+    "#시그니처아이템",
+    "#직장인취미"
+  ],
+  "self_check": {
+    "overlap_with_reference": false,
+    "notes": "샘플 원고 — 비교할 레퍼런스 없음"
+  }
 }

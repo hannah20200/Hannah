@@ -43,7 +43,8 @@ runCli(async () => {
 
   log(`\n원고 완료${regenerated ? " (겹침 때문에 1회 재생성)" : ""} → ${path.relative(process.cwd(), out)}`);
   for (const c of draft.covers) log(`  표지${c.variant}: ${c.title.join(" ")}`);
-  for (const item of draft.items) log(`  [${item.pillar}] ${item.head}  —  ${item.pick}`);
+  log(`  카테고리: ${draft.category ?? "(없음)"}`);
+  for (const item of draft.items) log(`  ${item.head}  —  ${item.pick}`);
   log(`  self_check: ${draft.self_check.notes}`);
   if (overlaps.length) {
     log("\n확인할 점: 레퍼런스와 비슷한 항목이 남아 있습니다");
