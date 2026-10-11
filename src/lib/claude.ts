@@ -321,8 +321,8 @@ export async function rewriteSlide(
     rules = [
       `- variant는 "${arg}" 그대로.`,
       `- 다른 표지(${other?.title.join(" ")})와 제목·photo_query가 달라야 한다.`,
-      "- title은 2줄, 반말·구어체, 한 줄에 12자 안팎. 숫자는 제목보다 sub에.",
-      "- top_line은 독자의 속마음 같은 짧은 한 줄.",
+      "- title은 2줄, 반말·구어체. 숫자는 제목보다 sub에.",
+      "- title은 한 줄에 9자 안팎으로 짧게. top_line은 꼭 필요할 때만 (없어도 됨).",
     ].join("\n");
     schema = CoverOut;
   } else if (kind === "intro" && plain.intro[Number(arg) - 1]) {

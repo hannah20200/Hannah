@@ -48,36 +48,56 @@ export function Cover({ data }: { data: CoverData }) {
               height: t.collage.height,
               transform: `rotate(${slot.rotate}deg)`,
               boxShadow: t.collage.shadow,
-              border: t.collage.border ? `${t.collage.border}px solid ${t.collage.borderColor}` : undefined,
+              border: t.collage.border
+                ? `${t.collage.border}px solid ${t.collage.borderColor}`
+                : undefined,
               borderRadius: t.collage.radius,
               overflow: "hidden",
               background: t.collage.borderColor,
             }}
           >
-            <img src={p.src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <img
+              src={p.src}
+              alt=""
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
           </div>
         );
       })}
 
-      {/* 상단 한 줄(속마음) */}
-      <FitLine
-        style={{
-          position: "absolute",
-          left: t.topLine.sidePadding,
-          right: t.topLine.sidePadding,
-          top: centerTop(t.topLine.y, t.topLine.size * 1.4),
-          lineHeight: `${t.topLine.size * 1.4}px`,
-          fontSize: t.topLine.size,
-          fontWeight: t.topLine.weight,
-          textAlign: "center",
-          textShadow: color.textShadow,
-        }}
-      >
-        {data.top_line}
-      </FitLine>
+      {/* 상단 한 줄(선택) */}
+      {data.top_line?.trim() && (
+        <FitLine
+          style={{
+            position: "absolute",
+            left: t.topLine.sidePadding,
+            right: t.topLine.sidePadding,
+            top: centerTop(t.topLine.y, t.topLine.size * 1.4),
+            lineHeight: `${t.topLine.size * 1.4}px`,
+            fontSize: t.topLine.size,
+            fontWeight: t.topLine.weight,
+            textAlign: "center",
+            textShadow: color.textShadow,
+          }}
+        >
+          {data.top_line}
+        </FitLine>
+      )}
 
       {/* 제목 + 부제 */}
-      <div style={{ position: "absolute", left: t.title.x, right: t.title.x, top: titleTop }}>
+      <div
+        style={{
+          position: "absolute",
+          left: t.title.x,
+          right: t.title.x,
+          top: titleTop,
+        }}
+      >
         {data.title.map((line, i) => (
           <FitLine
             key={i}

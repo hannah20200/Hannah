@@ -182,7 +182,7 @@ export default function DraftPage() {
             deps={c}
             {...slideProps}
           >
-            <TextField label="상단 한 줄 (속마음)" value={c.top_line} onChange={(v) => edit((d) => void (d.covers[i].top_line = v))} />
+            <TextField label="상단 한 줄 (선택, 비우면 표시 안 함)" value={c.top_line ?? ""} onChange={(v) => edit((d) => void (d.covers[i].top_line = v.trim() ? v : undefined))} />
             <LinesField label="제목 (2줄, 반말·구어체)" value={c.title} min={1} max={2} onChange={(v) => edit((d) => void (d.covers[i].title = v))} />
             <TextField label="부제 (숫자는 여기에)" value={c.sub} onChange={(v) => edit((d) => void (d.covers[i].sub = v))} />
             <TextField label="사진 검색어 (영어)" mono value={c.photo_query} onChange={(v) => edit((d) => void (d.covers[i].photo_query = v))} />

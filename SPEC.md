@@ -33,7 +33,7 @@
 {
   "category": "READ|BUY|WEAR (선택, 게시물 단위)",
   "covers": [
-    {"variant": "A", "top_line": "상단 한 줄(속마음)", "title": ["1줄", "2줄"], "sub": "부제", "photo_query": "검색어(영문)"},
+    {"variant": "A", "top_line": "(선택) 상단 한 줄", "title": ["1줄", "2줄"], "sub": "부제", "photo_query": "검색어(영문)"},
     {"variant": "B", "top_line": "...", "title": ["...", "..."], "sub": "...", "photo_query": "..."}
   ],
   "intro": [

@@ -23,7 +23,8 @@ const lines = (min: number, max: number) => z.array(z.string().min(1)).min(min).
 
 export const CoverSchema = z.object({
   variant: z.enum(["A", "B"]),
-  top_line: z.string().min(1),
+  /** 표지 상단 한 줄 (없어도 됨 — 표지는 짧을수록 좋다) */
+  top_line: z.string().optional(),
   title: lines(1, 2),
   sub: z.string().min(1),
   photo_query: z.string().min(1),
