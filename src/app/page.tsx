@@ -22,6 +22,12 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [posts, setPosts] = useState<PostSummary[] | null>(null);
 
+  // 보드의 아이디어에서 "이걸로 시작" → ?topic=
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("topic");
+    if (t) setTopic(t);
+  }, []);
+
   useEffect(() => {
     api<{ posts: PostSummary[] }>("/api/posts").then((r) => setPosts(r.posts)).catch(() => setPosts([]));
   }, []);

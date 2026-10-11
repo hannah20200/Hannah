@@ -12,6 +12,8 @@
     "analyze": "tsx src/cli/analyze.ts",
     "draft": "tsx src/cli/draft.ts",
     "photos": "tsx src/cli/photos.ts",
+    "publish": "tsx src/cli/publish.ts",
+    "publish:due": "tsx src/cli/publish.ts --due",
     "render": "tsx src/render/cli.ts",
     "render:sample": "tsx src/render/cli.ts samples/taste_check.json"
   },

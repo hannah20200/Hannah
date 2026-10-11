@@ -118,3 +118,49 @@ export function safeFile(id: string, area: "work" | "out", rel: string): string 
   if (!full.startsWith(base + path.sep)) throw new StoreError(400, "잘못된 경로");
   return full;
 }
+
+// ---------------------------------------------------------------------------
+// 게시 상태 (work/{id}/publish.json)
+// ---------------------------------------------------------------------------
+
+export const PublishStateSchema = z.object({
+  status: z.enum(["scheduled", "publishing", "published", "failed"]),
+  cover: z.enum(["A", "B"]),
+  /** 게시 시각 (ISO, UTC) */
+  scheduled_at: z.string(),
+  /** 공개 이미지 URL용 비밀 토큰 */
+  token: z.string(),
+  updated_at: z.string(),
+  attempts: z.number().int(),
+  published_at: z.string().optional(),
+  media_id: z.string().optional(),
+  permalink: z.string().optional(),
+  error: z.string().optional(),
+});
+export type PublishState = z.infer<typeof PublishStateSchema>;
+
+export const readPublish = (id: string) => readJson<PublishState>(path.join(postDir(id), "publish.json"), PublishStateSchema);
+export const writePublish = (id: string, s: PublishState) => writeJson(path.join(postDir(id), "publish.json"), s);
+export async function deletePublish(id: string) {
+  const { rm } = await import("node:fs/promises");
+  await rm(path.join(postDir(id), "publish.json"), { force: true });
+}
+
+/** 모든 게시물 id */
+export async function listPostIds(): Promise<string[]> {
+  if (!existsSync(WORK_DIR)) return [];
+  return (await readdir(WORK_DIR)).filter((id) => ID_RE.test(id) && existsSync(path.join(WORK_DIR, id, "meta.json")));
+}
+
+// ---------------------------------------------------------------------------
+// 아이디어 메모 (work/_ideas.json)
+// ---------------------------------------------------------------------------
+
+export const IdeaSchema = z.object({ id: z.string(), text: z.string(), created_at: z.string() });
+export type Idea = z.infer<typeof IdeaSchema>;
+const IDEAS = () => path.join(WORK_DIR, "_ideas.json");
+
+export async function readIdeas(): Promise<Idea[]> {
+  return (await readJson(IDEAS(), z.array(IdeaSchema))) ?? [];
+}
+export const writeIdeas = (ideas: Idea[]) => writeJson(IDEAS(), ideas);

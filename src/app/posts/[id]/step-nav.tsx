@@ -7,7 +7,7 @@ const STEPS = [
   { path: "analyze", label: "분석" },
   { path: "draft", label: "원고" },
   { path: "photos", label: "사진" },
-  { path: "preview", label: "미리보기 · 내보내기" },
+  { path: "preview", label: "미리보기 · 게시" },
 ];
 
 export function StepNav({ id }: { id: string }) {

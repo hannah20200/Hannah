@@ -14,7 +14,7 @@ export function positional(): string[] {
   return out;
 }
 
-const BOOL_FLAGS = new Set(["--dry-run", "--refresh", "--no-sheet"]);
+const BOOL_FLAGS = new Set(["--dry-run", "--refresh", "--no-sheet", "--now", "--cancel", "--due"]);
 
 export function flag(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);

@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, fileUrl, usePost } from "@/app/_components/client";
+import { PublishPanel } from "@/app/_components/publish-panel";
 import { Button, Card, ErrorBox, Loading, Notice, Working } from "@/app/_components/ui";
 
 type Slide = { name: string; url: string };
@@ -69,7 +70,7 @@ export default function PreviewPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold">미리보기 · 내보내기</h1>
+          <h1 className="text-2xl font-extrabold">미리보기 · 내보내기 · 게시</h1>
           <p className="mt-1 text-sm text-muted">표지는 A/B 두 가지예요. 올릴 때 하나를 첫 장으로 쓰세요. 원고·사진을 고쳤다면 다시 만들어 주세요.</p>
         </div>
         <div className="flex gap-2">
@@ -129,6 +130,8 @@ export default function PreviewPage() {
           <p className="text-sm leading-relaxed text-muted">{hashtags}</p>
         </Card>
       </div>
+
+      <PublishPanel id={id} initial={post.publish} hasPngs={!!has} />
 
       {open !== null && slides && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setOpen(null)}>

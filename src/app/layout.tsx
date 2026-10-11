@@ -15,7 +15,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/" className="text-lg font-extrabold tracking-tight">
               작은 매거진 <span className="font-semibold text-muted">게시물 메이커</span>
             </Link>
-            <span className="text-sm text-muted">READ · BUY · WEAR</span>
+            <nav className="flex items-center gap-5 text-sm font-bold">
+              <Link href="/" className="text-muted hover:text-ink">
+                새 게시물
+              </Link>
+              <Link href="/board" className="text-muted hover:text-ink">
+                콘텐츠 보드
+              </Link>
+            </nav>
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>

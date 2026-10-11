@@ -1,6 +1,6 @@
 import { handle } from "@/lib/api";
 import { listSlots } from "@/lib/photo-plan";
-import { listRendered, readAnalysis, readDraft, readMeta, readPhotoState } from "@/lib/store";
+import { listRendered, readAnalysis, readDraft, readMeta, readPhotoState, readPublish } from "@/lib/store";
 
 /** GET /api/posts/{id} → 게시물 전체 상태 */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -15,6 +15,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       photoState: (await readPhotoState(id)) ?? null,
       slots: draft ? listSlots(draft) : [],
       rendered: await listRendered(id),
+      publish: (await readPublish(id)) ?? null,
     };
   });
 }

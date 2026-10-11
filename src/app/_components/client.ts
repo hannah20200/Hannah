@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Slot, PhotoState } from "@/lib/photo-plan";
 import type { Analysis, Draft } from "@/lib/schema";
-import type { PostMeta } from "@/lib/store";
+import type { PostMeta, PublishState } from "@/lib/store";
 
 export type PostData = {
   meta: PostMeta;
@@ -12,6 +12,7 @@ export type PostData = {
   photoState: PhotoState | null;
   slots: Slot[];
   rendered: string[];
+  publish: PublishState | null;
 };
 
 /** fetch + JSON + 에러 메시지 */

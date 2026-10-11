@@ -3,7 +3,7 @@
 레퍼런스 게시물 캡처를 참고해 우리 계정 톤의 인스타그램 캐러셀(원고 + 1080×1350 PNG + 캡션)을 만드는 도구.
 규칙은 `CLAUDE.md`, 상세 사양은 `SPEC.md`.
 
-## 웹 화면 (4단계)
+## 웹 화면
 
 ```bash
 npm install
@@ -15,10 +15,38 @@ npm run dev                  # http://localhost:3000
 2. **분석** — 구성 / 톤 / 비주얼 / 잘한 점 / 차별점 / 겹치면 안 되는 항목·결론 카드
 3. **원고** — 표지 A/B, 도입, 항목 6개, 마무리, 캡션·해시태그를 직접 고치기. 장마다 실시간 미리보기와 "다시 쓰기"(요청 메모 가능)
 4. **사진** — 자리마다 후보 중 고르기 또는 직접 올리기. 크레딧 자동 표기
-5. **미리보기·내보내기** — PNG 10장 그리드 + 크게 보기(←/→), zip 다운로드, 캡션·해시태그 복사
+5. **미리보기·게시** — PNG 10장 그리드 + 크게 보기(←/→), zip 다운로드, 캡션·해시태그 복사, Instagram 예약·게시
+
+**콘텐츠 보드** (`/board`) — 아이디어 메모 → 작업 중 → 게시 준비 → 예약 → 게시됨, 앞으로 2주 달력, Instagram 연결 상태.
 
 API 키가 없어도 **"샘플 원고로 둘러보기"**로 원고 수정 → 미리보기 → zip까지 해볼 수 있습니다.
 게시물은 CLI와 같은 `work/{id}/`에 저장돼서, 웹에서 만든 게시물을 CLI로 이어서 작업할 수도 있습니다.
+
+## Instagram 게시 설정 (5단계, 선택)
+
+Instagram API로 캐러셀을 올리려면 아래가 필요합니다.
+
+1. **Instagram 비즈니스 또는 크리에이터 계정**
+2. **Meta 개발자 앱** + `instagram_business_content_publish` 권한의 **장기 액세스 토큰**과 **Instagram 계정 ID**
+   (Facebook 로그인 방식 토큰이면 `INSTAGRAM_GRAPH_HOST=graph.facebook.com`)
+3. **공개 주소**: Instagram 서버가 이 앱에서 이미지를 직접 가져가기 때문에, 로컬 앱이 바깥에서 보여야 합니다.
+   ```bash
+   npm run build && npm run start                       # http://localhost:3000
+   cloudflared tunnel --url http://localhost:3000       # 나오는 https://xxxx.trycloudflare.com 을 PUBLIC_BASE_URL에
+   ```
+   이미지 주소(`/api/public/{id}/{비밀 토큰}/NN.jpg`)는 해당 게시물이 **게시 중일 때만** 열립니다.
+4. `.env.local`에 `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_USER_ID`, `PUBLIC_BASE_URL` → 서버 재시작 → 보드의 "Instagram 연결"이 모두 초록색인지 확인
+
+게시 방식
+- 첫 장은 표지 A/B 중 하나만 → **표지 1장 + 도입 + 항목 6장 + 마무리 = 9장** 캐러셀
+- 미리보기에서 만든 PNG를 그대로 **JPEG로 변환**해서 올립니다 (Instagram API는 JPEG만 받음). 원고를 고쳤다면 PNG를 다시 만들어 주세요.
+- 캡션 2,200자·해시태그 30개를 넘으면 예약 전에 막습니다.
+- **예약**: Instagram API에는 예약 기능이 없어서, 이 앱의 스케줄러가 1분마다 확인해 시간이 되면 올립니다.
+  그래서 예약 시각에 **앱 서버와 터널이 켜져 있어야** 합니다. (서버 대신 cron으로 `npm run publish:due`를 돌려도 됩니다 — 이때도 이미지 제공용 서버·터널은 필요)
+- 실패하면 보드·미리보기에 이유가 나오고, "지금 다시 게시"나 예약 바꾸기로 다시 시도할 수 있습니다.
+- 24시간 게시 한도는 연결 상태에서 확인할 수 있습니다. 장기 토큰은 약 60일마다 갱신해야 합니다.
+
+CLI: `npm run publish -- <id> --cover A --at "2026-10-15 20:00"` (예약) · `--now` (지금) · `--cancel` · `npm run publish:due`
 
 ## CLI
 
@@ -77,6 +105,8 @@ npm run render -- work/연말취향/draft.json                # → out/연말�
 - `src/cli/` — analyze / draft / photos 명령
 - `src/app/` — 웹 화면 (`/`, `/posts/{id}/analyze|draft|photos|preview`), `src/app/api/` — analyze, draft(+rewrite), photos(+match, upload), render, export, posts
 - `src/lib/store.ts` — 게시물 저장소 (`work/{id}/`), `render-process.ts` — 웹에서 렌더 CLI를 자식 프로세스로 실행
+- `src/lib/instagram.ts` — Graph API 캐러셀 게시, `publish.ts` — 예약·게시·runDue, `scheduler.ts` + `src/instrumentation.ts` — 서버 내 스케줄러, `jpeg.ts` — PNG→JPEG
+- `src/app/board/` — 콘텐츠 보드
 - `src/lib/schema.ts` — 원고 JSON zod 스키마 (SPEC 3-2, 사진 필드는 선택)
 - `src/templates/tokens.ts` — 디자인 수치는 여기에만
 - `src/templates/{Cover,Page,End}.tsx` — 슬라이드 템플릿
