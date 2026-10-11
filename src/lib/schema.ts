@@ -63,12 +63,18 @@ export const EndSchema = z.object({
 });
 export type End = z.infer<typeof EndSchema>;
 
+export const ITEMS_MIN = 3;
+export const ITEMS_MAX = 8;
+/** Instagram 캐러셀 최대 장수 (게시할 때 표지는 A/B 중 1장) */
+export const CAROUSEL_MAX = 10;
+
 const draftShape = {
   /** 이 게시물이 속한 계정 카테고리 (없으면 비움) */
   category: CategorySchema.optional(),
   covers: z.array(CoverSchema).length(2),
-  intro: z.array(IntroSchema).min(1),
-  items: z.array(ItemSchema).length(6),
+  intro: z.array(IntroSchema).max(1),
+  /** 항목 수는 레퍼런스 구성에 맞춰 자유롭게 (캐러셀 10장 한도는 checkDraft에서) */
+  items: z.array(ItemSchema).min(ITEMS_MIN).max(ITEMS_MAX),
   end: EndSchema,
   caption: z.string().min(1),
   hashtags: z.array(z.string().regex(/^#\S+$/)).min(1),
@@ -78,10 +84,18 @@ const draftShape = {
   }),
 };
 
-function checkDraft(d: { covers: { variant: string }[] }, ctx: z.RefinementCtx) {
+function checkDraft(d: { covers: { variant: string }[]; intro: unknown[]; items: unknown[] }, ctx: z.RefinementCtx) {
   const variants = d.covers.map((c) => c.variant).sort().join("");
   if (variants !== "AB") {
     ctx.addIssue({ code: "custom", path: ["covers"], message: "표지는 A/B 두 버전이어야 합니다" });
+  }
+  const slides = 1 + d.intro.length + d.items.length + 1;
+  if (slides > CAROUSEL_MAX) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["items"],
+      message: `표지 1 + 도입 ${d.intro.length} + 항목 ${d.items.length} + 마무리 1 = ${slides}장으로 캐러셀 ${CAROUSEL_MAX}장을 넘습니다`,
+    });
   }
 }
 
@@ -96,8 +110,8 @@ export type Draft = z.infer<typeof DraftSchema>;
 export const DraftOutputBase = z.object({
   ...draftShape,
   covers: z.array(CoverSchema.omit({ photo: true, collage: true })).length(2),
-  intro: z.array(IntroSchema.omit({ photo: true })).min(1),
-  items: z.array(ItemSchema.omit({ photo: true })).length(6),
+  intro: z.array(IntroSchema.omit({ photo: true })).max(1),
+  items: z.array(ItemSchema.omit({ photo: true })).min(ITEMS_MIN).max(ITEMS_MAX),
   end: EndSchema.omit({ photo: true }).extend({ photo_query: z.string().min(1) }),
 });
 export const DraftOutputSchema = DraftOutputBase.superRefine(checkDraft);

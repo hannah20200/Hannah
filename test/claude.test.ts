@@ -62,10 +62,18 @@ describe("schema", () => {
     assert.ok(DraftOutputSchema.safeParse(sampleDraft()).success);
   });
 
-  it("항목이 6개가 아니면 잡는다", () => {
+  it("항목 수는 3~8개, 캐러셀 10장을 넘으면 안 된다", () => {
     const d = sampleDraft();
-    d.items.pop();
-    assert.equal(DraftOutputSchema.safeParse(d).success, false);
+    const item = d.items[0];
+    assert.ok(DraftOutputSchema.safeParse({ ...d, items: d.items.slice(0, 3) }).success, "3개 OK");
+    assert.equal(DraftOutputSchema.safeParse({ ...d, items: d.items.slice(0, 2) }).success, false, "2개는 안 됨");
+    // 표지1 + 도입1 + 항목7 + 마무리1 = 10장 OK
+    assert.ok(DraftOutputSchema.safeParse({ ...d, items: Array(7).fill(item) }).success, "7개 + 도입 OK");
+    // 항목 8개 + 도입 1 = 11장 → 안 됨, 도입 없이 8개 = 10장 OK
+    const eight = DraftOutputSchema.safeParse({ ...d, items: Array(8).fill(item) });
+    assert.equal(eight.success, false);
+    assert.match(JSON.stringify(eight.error?.issues), /10장을 넘습니다/);
+    assert.ok(DraftOutputSchema.safeParse({ ...d, intro: [], items: Array(8).fill(item) }).success, "도입 없이 8개 OK");
   });
 
   it("카테고리는 게시물 단위로 하나 (없어도 됨), 항목에는 붙이지 않는다", () => {

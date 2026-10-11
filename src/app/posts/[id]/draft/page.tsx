@@ -7,7 +7,7 @@ import { cleanLines, LinesField, TextField } from "@/app/_components/fields";
 import { browserDraft, SlidePreview } from "@/app/_components/slide-preview";
 import { Button, Card, ErrorBox, Loading, Notice, Spinner } from "@/app/_components/ui";
 import { findOverlaps, type Overlap } from "@/lib/overlap";
-import type { Category, Draft } from "@/lib/schema";
+import { CAROUSEL_MAX, ITEMS_MAX, ITEMS_MIN, type Category, type Draft } from "@/lib/schema";
 import { Cover } from "@/templates/Cover";
 import { End } from "@/templates/End";
 import { Page } from "@/templates/Page";
@@ -18,6 +18,13 @@ const CATEGORIES: { value: Category | undefined; label: string }[] = [
   { value: "WEAR", label: "WEAR 입다" },
   { value: undefined, label: "해당 없음" },
 ];
+
+/** 항목 제목 앞 번호를 순서대로 다시 매긴다 */
+function renumber(d: Draft) {
+  d.items.forEach((it, i) => {
+    it.head = /^\s*\d+\s*\./.test(it.head) ? it.head.replace(/^\s*\d+/, String(i + 1)) : `${i + 1}. ${it.head}`;
+  });
+}
 
 /** 저장 전 정리: 빈 줄 제거, 해시태그 # 붙이기 */
 function normalize(d: Draft): Draft {
@@ -197,8 +204,50 @@ export default function DraftPage() {
           <LinesField label="굵은 밑줄 문장" value={s.key} min={1} max={1} onChange={(v) => edit((d) => void (d.items[i].key = v))} />
           <TextField label="PICK (‘PICK · ’로 시작)" value={s.pick} onChange={(v) => edit((d) => void (d.items[i].pick = v))} />
           <TextField label="사진 검색어 (영어)" mono value={s.photo_query} onChange={(v) => edit((d) => void (d.items[i].photo_query = v))} />
+          <button
+            className="text-xs text-muted hover:text-red-600 disabled:opacity-30"
+            disabled={draft.items.length <= ITEMS_MIN}
+            onClick={() =>
+              confirm(`항목 ${i + 1}을 뺄까요?`) &&
+              edit((d) => {
+                d.items.splice(i, 1);
+                renumber(d);
+              })
+            }
+          >
+            이 항목 빼기
+          </button>
         </SlideRow>
       ))}
+
+      {(() => {
+        const slides = 1 + draft.intro.length + draft.items.length + 1;
+        const full = draft.items.length >= ITEMS_MAX || slides >= CAROUSEL_MAX;
+        return (
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              disabled={full}
+              onClick={() =>
+                edit((d) => {
+                  d.items.push({
+                    head: `${d.items.length + 1}. 새 항목`,
+                    body: ["첫째 줄", "둘째 줄"],
+                    key: ["강조할 문장"],
+                    pick: "PICK · 바로 해볼 것",
+                    photo_query: "woman lifestyle natural light",
+                  });
+                })
+              }
+            >
+              + 항목 추가
+            </Button>
+            <span className="text-xs text-muted">
+              항목 {draft.items.length}개 · 게시할 때 {slides}장 (표지 1 + 도입 {draft.intro.length} + 항목 + 마무리 1, 최대 {CAROUSEL_MAX}장)
+            </span>
+          </div>
+        );
+      })()}
 
       <SlideRow title="마무리" target="end" preview={<End data={preview.end} />} deps={draft.end} {...slideProps}>
         <LinesField label="질문 (1~2줄)" value={draft.end.lines} min={1} max={2} onChange={(v) => edit((d) => void (d.end.lines = v))} />
