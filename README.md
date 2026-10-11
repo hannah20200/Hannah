@@ -3,7 +3,24 @@
 레퍼런스 게시물 캡처를 참고해 우리 계정 톤의 인스타그램 캐러셀(원고 + 1080×1350 PNG + 캡션)을 만드는 도구.
 규칙은 `CLAUDE.md`, 상세 사양은 `SPEC.md`.
 
-## 현재 단계: 3단계 (사진 API 연결)
+## 웹 화면 (4단계)
+
+```bash
+npm install
+cp .env.example .env.local   # ANTHROPIC_API_KEY, CLAUDE_MODEL, UNSPLASH_ACCESS_KEY, PEXELS_API_KEY
+npm run dev                  # http://localhost:3000
+```
+
+1. **업로드** — 레퍼런스 캡처 1~10장(순서 조정 가능) + 주제 메모 + 직접 써본 것 목록
+2. **분석** — 구성 / 톤 / 비주얼 / 잘한 점 / 차별점 / 겹치면 안 되는 항목·결론 카드
+3. **원고** — 표지 A/B, 도입, 항목 6개, 마무리, 캡션·해시태그를 직접 고치기. 장마다 실시간 미리보기와 "다시 쓰기"(요청 메모 가능)
+4. **사진** — 자리마다 후보 중 고르기 또는 직접 올리기. 크레딧 자동 표기
+5. **미리보기·내보내기** — PNG 10장 그리드 + 크게 보기(←/→), zip 다운로드, 캡션·해시태그 복사
+
+API 키가 없어도 **"샘플 원고로 둘러보기"**로 원고 수정 → 미리보기 → zip까지 해볼 수 있습니다.
+게시물은 CLI와 같은 `work/{id}/`에 저장돼서, 웹에서 만든 게시물을 CLI로 이어서 작업할 수도 있습니다.
+
+## CLI
 
 ```bash
 npm install
@@ -58,6 +75,8 @@ npm run render -- work/연말취향/draft.json                # → out/연말�
 - `src/lib/photos.ts` — Unsplash/Pexels 검색·제외·정렬·내려받기, `photo-plan.ts`·`photo-match.ts` — 자리별 배정
 - `src/render/sheet.ts` — 사진 후보 시트
 - `src/cli/` — analyze / draft / photos 명령
+- `src/app/` — 웹 화면 (`/`, `/posts/{id}/analyze|draft|photos|preview`), `src/app/api/` — analyze, draft(+rewrite), photos(+match, upload), render, export, posts
+- `src/lib/store.ts` — 게시물 저장소 (`work/{id}/`), `render-process.ts` — 웹에서 렌더 CLI를 자식 프로세스로 실행
 - `src/lib/schema.ts` — 원고 JSON zod 스키마 (SPEC 3-2, 사진 필드는 선택)
 - `src/templates/tokens.ts` — 디자인 수치는 여기에만
 - `src/templates/{Cover,Page,End}.tsx` — 슬라이드 템플릿

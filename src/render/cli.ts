@@ -1,6 +1,6 @@
 /**
  * 원고 JSON → PNG 렌더링 CLI
- *   npx tsx src/render/cli.ts <원고.json> [--out out] [--id postId]
+ *   npx tsx src/render/cli.ts <원고.json> [--out out] [--id postId] [--json]
  */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -34,6 +34,11 @@ async function main() {
 
   const started = Date.now();
   const { dir, files, warnings } = await renderPost(draft, { outRoot, postId });
+  if (process.argv.includes("--json")) {
+    // 웹 API(/api/render)가 자식 프로세스로 부를 때
+    console.log(JSON.stringify({ dir, files, warnings }));
+    return;
+  }
   console.log(`렌더링 완료 (${((Date.now() - started) / 1000).toFixed(1)}s) → ${path.relative(process.cwd(), dir)}/`);
   for (const f of files) console.log(`  ${path.relative(process.cwd(), f)}`);
   if (warnings.length) {

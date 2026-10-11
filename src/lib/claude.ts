@@ -8,13 +8,20 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import type { z } from "zod";
+import { z } from "zod";
 import { findOverlaps, type Overlap } from "./overlap";
+import { PROMPT_DIR } from "./paths";
 import {
   AnalysisSchema,
+  CoverSchema,
   DraftOutputBase,
   DraftOutputSchema,
+  DraftSchema,
+  EndSchema,
+  IntroSchema,
+  ItemSchema,
   type Analysis,
+  type Draft,
   type DraftOutput,
 } from "./schema";
 
@@ -22,7 +29,6 @@ type MessageParam = Anthropic.Beta.BetaMessageParam;
 type ContentBlockParam = Anthropic.Beta.BetaContentBlockParam;
 type Effort = "low" | "medium" | "high" | "xhigh" | "max";
 
-const PROMPT_DIR = path.resolve(import.meta.dirname, "../../prompts");
 const DEFAULT_MODEL = "claude-opus-5-5";
 /** 서버 측 거절 대체(fallbacks: "default")를 지원하는 모델 */
 const FALLBACK_MODELS = new Set(["claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5"]);
@@ -83,7 +89,16 @@ async function send(req: JsonRequest<unknown>) {
     messages: req.messages,
     ...(useFallback ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
   });
-  const message = await stream.finalMessage();
+  let message: Anthropic.Beta.BetaMessage;
+  try {
+    message = await stream.finalMessage();
+  } catch (err) {
+    // 키가 아예 없으면 SDK가 영어 메시지를 던진다 → 할 일을 알려주는 메시지로
+    if (err instanceof Anthropic.AnthropicError && !(err instanceof Anthropic.APIError) && /authentication method/i.test(err.message)) {
+      throw new Error("Claude API 키가 없습니다: .env.local에 ANTHROPIC_API_KEY를 넣어 주세요.");
+    }
+    throw err;
+  }
 
   if (message.stop_reason === "refusal") {
     const category = message.stop_details?.category ?? "unknown";
@@ -262,3 +277,135 @@ export async function generateDraft(input: DraftInput, opts: { log?: Logger } = 
 }
 
 export { RefusalError };
+
+// ---------------------------------------------------------------------------
+// 장별 다시 쓰기 (웹 화면의 "다시 쓰기" 버튼)
+// ---------------------------------------------------------------------------
+
+/** "cover.A" | "cover.B" | "intro.1" | "item.1"~"item.6" | "end" */
+export type RewriteTarget = string;
+
+const CoverOut = CoverSchema.omit({ photo: true, collage: true });
+const IntroOut = IntroSchema.omit({ photo: true });
+const ItemOut = ItemSchema.omit({ photo: true });
+const EndOut = EndSchema.omit({ photo: true }).extend({ photo_query: z.string().min(1) });
+
+/** 사진 필드를 뺀 원고 (프롬프트용) */
+function withoutPhotos(draft: Draft) {
+  return {
+    ...draft,
+    covers: draft.covers.map(({ photo: _p, collage: _c, ...c }) => c),
+    intro: draft.intro.map(({ photo: _p, ...s }) => s),
+    items: draft.items.map(({ photo: _p, ...s }) => s),
+    end: (({ photo: _p, ...s }) => s)(draft.end),
+  };
+}
+
+export async function rewriteSlide(
+  input: { draft: Draft; analysis?: Analysis; target: RewriteTarget; note?: string },
+  opts: { log?: Logger } = {},
+): Promise<{ draft: Draft; overlaps: Overlap[] }> {
+  const log = opts.log ?? silent;
+  const { draft, target } = input;
+  const [kind, arg] = target.split(".");
+  const plain = withoutPhotos(draft);
+
+  let current: unknown;
+  let rules: string;
+  let schema: z.ZodType;
+  let label: string;
+  if (kind === "cover" && (arg === "A" || arg === "B")) {
+    current = plain.covers.find((c) => c.variant === arg);
+    const other = plain.covers.find((c) => c.variant !== arg);
+    label = `표지 ${arg}`;
+    rules = [
+      `- variant는 "${arg}" 그대로.`,
+      `- 다른 표지(${other?.title.join(" ")})와 제목·photo_query가 달라야 한다.`,
+      "- title은 2줄, 반말·구어체, 한 줄에 12자 안팎. 숫자는 제목보다 sub에.",
+      "- top_line은 독자의 속마음 같은 짧은 한 줄.",
+    ].join("\n");
+    schema = CoverOut;
+  } else if (kind === "intro" && plain.intro[Number(arg) - 1]) {
+    current = plain.intro[Number(arg) - 1];
+    label = "도입";
+    rules = "- body 2~3줄(존댓말), key 1~2줄(굵은 밑줄로 강조될 핵심 문장).";
+    schema = IntroOut;
+  } else if (kind === "item" && plain.items[Number(arg) - 1]) {
+    const item = plain.items[Number(arg) - 1];
+    current = item;
+    label = `${arg}번 항목`;
+    rules = [
+      `- pillar는 "${item.pillar}" 그대로.`,
+      `- head는 "${arg}. 항목 제목" 형식, 한 줄에 20자 안팎.`,
+      "- body 2줄(존댓말, 한 줄에 25자 안팎), key 1줄.",
+      "- pick은 \"PICK · 구체적 선택지\" 형식. 이번 주에 바로 할 수 있을 만큼 구체적으로.",
+    ].join("\n");
+    schema = ItemOut;
+  } else if (kind === "end") {
+    current = plain.end;
+    label = "마무리";
+    rules = "- lines는 질문형 1~2줄(한 줄에 13자 안팎), cta는 저장을 부르는 1줄.";
+    schema = EndOut;
+  } else {
+    throw new Error(`다시 쓸 수 없는 장: ${target}`);
+  }
+
+  const prompt = (await loadPrompt("rewrite.md")).replace(/\{\{(\w+)\}\}/g, (_, key: string) =>
+    ({
+      target: label,
+      current: JSON.stringify(current, null, 2),
+      note: input.note?.trim() || "(없음 — 더 좋게 다시 써줘)",
+      rules,
+      draft: JSON.stringify(plain, null, 2),
+      analysis: input.analysis ? JSON.stringify(input.analysis, null, 2) : "(없음)",
+    })[key] ?? "",
+  );
+
+  const req: JsonRequest<any> = {
+    label: `${label} 다시 쓰기`,
+    system: await loadPrompt("system.md"),
+    messages: [{ role: "user", content: prompt }],
+    schema,
+    structure: schema,
+    effort: "medium",
+    log,
+  };
+  let slide = await requestJson(req);
+
+  // 항목 제목이 레퍼런스와 겹치면 1회 더
+  const avoid = input.analysis?.items_to_avoid ?? [];
+  let overlaps = kind === "item" ? findOverlaps([slide.head], avoid) : [];
+  if (overlaps.length) {
+    req.messages.push({
+      role: "user",
+      content: `레퍼런스 항목과 겹쳐: ${overlaps.map((o) => `"${o.head}" ↔ "${o.reference}"`).join(", ")}. 다른 내용으로 다시 써서 JSON을 출력해줘.`,
+    });
+    slide = await requestJson(req);
+    overlaps = findOverlaps([slide.head], avoid);
+  }
+
+  // 원고에 반영: 고정 필드는 원래 값으로, 사진은 검색어가 그대로일 때만 유지
+  const next: Draft = structuredClone(draft);
+  const keepPhoto = <T extends { photo_query?: string; photo?: unknown }>(prev: T, s: { photo_query?: string }) =>
+    prev.photo_query === s.photo_query ? { photo: prev.photo } : {};
+  if (kind === "cover") {
+    const i = next.covers.findIndex((c) => c.variant === arg);
+    const prev = next.covers[i];
+    next.covers[i] = {
+      ...slide,
+      variant: prev.variant,
+      ...(prev.photo_query === slide.photo_query ? { photo: prev.photo, collage: prev.collage } : {}),
+    };
+  } else if (kind === "intro") {
+    const i = Number(arg) - 1;
+    next.intro[i] = { ...slide, ...keepPhoto(next.intro[i], slide) };
+  } else if (kind === "item") {
+    const i = Number(arg) - 1;
+    const prev = next.items[i];
+    const head = /^\s*\d+\s*\./.test(slide.head) ? slide.head.replace(/^\s*\d+/, String(i + 1)) : `${i + 1}. ${slide.head}`;
+    next.items[i] = { ...slide, head, pillar: prev.pillar, ...keepPhoto(prev, slide) };
+  } else {
+    next.end = { ...slide, ...keepPhoto(next.end, slide) };
+  }
+  return { draft: DraftSchema.parse(next), overlaps };
+}

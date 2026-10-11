@@ -4,14 +4,13 @@ import { pathToFileURL } from "node:url";
 import { createElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { chromium, type Browser } from "playwright";
+import { FONT_DIR } from "../lib/paths";
 import type { Draft, Photo } from "../lib/schema";
 import { Cover } from "../templates/Cover";
 import { End } from "../templates/End";
 import { Page } from "../templates/Page";
 import { canvas, font } from "../templates/tokens";
 
-const ROOT = path.resolve(import.meta.dirname, "../..");
-const FONT_DIR = path.join(ROOT, "public/fonts");
 
 export type SlideSpec = { name: string; element: ReactElement };
 

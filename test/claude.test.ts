@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it, beforeEach } from "node:test";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { analyzeReference, generateDraft, setClientForTesting } from "../src/lib/claude";
+import { analyzeReference, generateDraft, rewriteSlide, setClientForTesting } from "../src/lib/claude";
 import { similarity, findOverlaps } from "../src/lib/overlap";
 import { DraftOutputBase, DraftOutputSchema, DraftSchema, type Analysis } from "../src/lib/schema";
 
@@ -158,5 +158,62 @@ describe("claude.ts", () => {
     assert.equal(calls[0].model, "claude-haiku-5-5");
     assert.equal(calls[0].fallbacks, undefined);
     assert.equal(calls[0].betas, undefined);
+  });
+});
+
+describe("rewriteSlide", () => {
+  const withPhotos = () => DraftSchema.parse(JSON.parse(readFileSync("samples/taste_check.json", "utf8")));
+
+  it("항목: pillar·번호는 그대로, 검색어가 바뀌면 사진을 비운다", async () => {
+    const draft = withPhotos();
+    const { client, calls } = fakeClient([
+      JSON.stringify({
+        pillar: "WEAR",
+        head: "새로 쓴 제목",
+        body: ["첫 줄이에요.", "둘째 줄이에요."],
+        key: ["핵심 문장이에요."],
+        pick: "PICK · 이번 주에 하나",
+        photo_query: "new query",
+      }),
+    ]);
+    setClientForTesting(client);
+    const r = await rewriteSlide({ draft, analysis, target: "item.3", note: "더 짧게" });
+    const item = r.draft.items[2];
+    assert.equal(item.pillar, "BUY");
+    assert.equal(item.head, "3. 새로 쓴 제목");
+    assert.equal(item.photo, undefined);
+    assert.deepEqual(r.draft.items[0], draft.items[0], "다른 장은 그대로");
+    assert.match(calls[0].messages[0].content, /3번 항목/);
+    assert.match(calls[0].messages[0].content, /더 짧게/);
+    assert.ok(!calls[0].messages[0].content.includes('"photo"'), "프롬프트에 사진 정보는 빼고 보냄");
+  });
+
+  it("표지: variant 고정, 검색어가 같으면 사진·콜라주 유지", async () => {
+    const draft = withPhotos();
+    const b = draft.covers[1];
+    const { client } = fakeClient([
+      JSON.stringify({ variant: "A", top_line: "새 한 줄", title: ["새 제목", "둘째 줄"], sub: "부제", photo_query: b.photo_query }),
+    ]);
+    setClientForTesting(client);
+    const r = await rewriteSlide({ draft, target: "cover.B" });
+    assert.equal(r.draft.covers[1].variant, "B");
+    assert.equal(r.draft.covers[1].top_line, "새 한 줄");
+    assert.deepEqual(r.draft.covers[1].photo, b.photo);
+    assert.deepEqual(r.draft.covers[1].collage, b.collage);
+  });
+
+  it("항목 제목이 레퍼런스와 겹치면 한 번 더 요청", async () => {
+    const item = (head: string) =>
+      JSON.stringify({ pillar: "READ", head, body: ["a", "b"], key: ["c"], pick: "PICK · d", photo_query: "q" });
+    const { client, calls } = fakeClient([item("1. 퇴근 후 30분 산책하기"), item("1. 전혀 다른 제목")]);
+    setClientForTesting(client);
+    const r = await rewriteSlide({ draft: withPhotos(), analysis, target: "item.1" });
+    assert.equal(calls.length, 2);
+    assert.equal(r.overlaps.length, 0);
+    assert.equal(r.draft.items[0].head, "1. 전혀 다른 제목");
+  });
+
+  it("없는 장은 에러", async () => {
+    await assert.rejects(rewriteSlide({ draft: withPhotos(), target: "item.9" }), /다시 쓸 수 없는 장/);
   });
 });
