@@ -50,7 +50,7 @@ export function resolvePhotos(draft: Draft, baseDir: string): Draft {
   };
 }
 
-function fontFaceCss(): string {
+export function fontFaceCss(): string {
   return font.files
     .map((f) => {
       const url = pathToFileURL(path.join(FONT_DIR, f.file)).href;

@@ -14,11 +14,20 @@ export function positional(): string[] {
   return out;
 }
 
-const BOOL_FLAGS = new Set(["--dry-run"]);
+const BOOL_FLAGS = new Set(["--dry-run", "--refresh", "--no-sheet"]);
 
 export function flag(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 ? process.argv[i + 1] : undefined;
+}
+
+/** 여러 번 줄 수 있는 옵션 (--pick a=1 --pick b=2) */
+export function flags(name: string): string[] {
+  const out: string[] = [];
+  process.argv.forEach((v, i) => {
+    if (v === `--${name}` && i + 1 < process.argv.length) out.push(process.argv[i + 1]);
+  });
+  return out;
 }
 
 export function has(name: string): boolean {

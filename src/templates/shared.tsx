@@ -57,9 +57,11 @@ function Credit({ photos }: { photos: Photo[] }) {
   if (names.length === 0) return null;
   return (
     <div
+      data-fit="1"
       style={{
         position: "absolute",
         left: credit.x,
+        right: credit.x,
         top: centerTop(credit.y, credit.size * 1.4),
         lineHeight: `${credit.size * 1.4}px`,
         fontSize: credit.size,

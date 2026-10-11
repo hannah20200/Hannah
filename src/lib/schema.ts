@@ -10,6 +10,12 @@ export const PhotoSchema = z.object({
   src: z.string().min(1),
   /** 크레딧. 예: "작가명 / Unsplash" → 렌더 시 "photo | 작가명 / Unsplash" */
   credit: z.string().min(1),
+  /** 이하 3단계 사진 매칭에서 채움 (출처 표기·라이선스 확인용) */
+  source: z.enum(["unsplash", "pexels", "upload", "placeholder"]).optional(),
+  /** 사진 페이지 URL */
+  page: z.string().optional(),
+  /** 작가 페이지 URL */
+  author_link: z.string().optional(),
 });
 export type Photo = z.infer<typeof PhotoSchema>;
 
