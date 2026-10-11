@@ -27,7 +27,9 @@ async function main() {
   }
 
   const draft = resolvePhotos(parsed.data, path.dirname(jsonPath));
-  const postId = arg("id") ?? path.basename(jsonPath, ".json");
+  // work/{id}/draft.json 은 폴더 이름을 게시물 이름으로 쓴다
+  const base = path.basename(jsonPath, ".json");
+  const postId = arg("id") ?? (base === "draft" ? path.basename(path.dirname(jsonPath)) : base);
   const outRoot = path.resolve(arg("out") ?? "out");
 
   const started = Date.now();

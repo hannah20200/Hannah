@@ -8,13 +8,18 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "analyze": "tsx src/cli/analyze.ts",
+    "draft": "tsx src/cli/draft.ts",
+    "render": "tsx src/render/cli.ts",
     "render:sample": "tsx src/render/cli.ts samples/taste_check.json"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.133.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "zod": "3.25.76"
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@types/node": "22.18.6",
